@@ -1,0 +1,92 @@
+#In the data set CO2.csv are data on the carbon dioxide emissions from New Zealand. The data is for the years 196o to 2014 and was 
+collected by the World Bank.
+#( https://data.worldbank.org/country/new-zealand?view=chart )
+#There are four variables:-
+#Year The year
+#CO2 Total emissions in metric kiloTonnes
+#CO2_per_capita Emissions per capita in metric Tonnes
+#Population Population of the country
+
+setwd("Current working directory")
+CE = read.csv("NZCO2.csv")
+#View(CE)
+library(ggplot2)
+library(gam)
+attach(CE)
+
+names(CE)
+hist(CO2)
+
+ggplot(CE, aes(x=Year,y=CO2))+geom_point(pch=18,color='blue')
+ggplot(CE, aes(x=Year,y=CO2_per_capita))+geom_point(pch = 19,color='red')
+ggplot(CE , aes(x=Year ,y=Population))+geom_point(pch=15,color = 'green')
+
+coplot(CO2~Population|Year)
+coplot(CO2~CO2_per_capita|Year)
+
+model1<-gam(CO2~s(Year , spar = 0.1) ,data=CE)
+model1_sum <-summary(model1)
+model1_sum
+
+r2_model1 <-(model1_sum$null.deviance-model1_sum$deviance)/model1_sum$null.deviance
+r2_model1
+
+#par(mfrow=c(2,2))
+CE$pred1 <- predict(model1) 
+mse1 <- mean((CE$pred1-CO2)^2)
+mse1
+p1 <-  ggplot(CE, aes(x=Year, y=CO2)) + geom_point()
+p1 <- p1 + theme_bw()
+p1 <- p1 + geom_line(aes(Year, pred1))
+p1
+
+model2<-gam(CO2~s(Year,spar = 0.3),data=CE)
+model2_sum<-summary(model2)
+model2_sum
+
+r2_model2 <-(model2_sum$null.deviance-model2_sum$deviance)/model2_sum$null.deviance
+r2_model2
+
+CE$pred2 <- predict(model2) 
+mse2 <- mean((CE$pred2-CO2)^2)
+mse2
+p2 <-  ggplot(CE, aes(x=Year, y=CO2)) + geom_point()
+p2 <- p2 + theme_bw()
+p2 <- p2 + geom_line(aes(Year, pred2))
+p2
+
+anova(model1,model2,test='F')
+
+model3<-gam(CO2~s(Year,spar = 0.55),data=CE)
+model3_sum<-summary(model3)
+model3_sum
+
+r2_model3 <-(model3_sum$null.deviance-model3_sum$deviance)/model3_sum$null.deviance
+r2_model3
+
+CE$pred3 <- predict(model3)
+mse3 <- mean((CE$pred3-CO2)^2)
+mse3
+p3 <-  ggplot(CE, aes(x=Year, y=CO2)) + geom_point()
+p3 <- p3 + theme_bw()
+p3 <- p3 + geom_line(aes(Year, pred3))
+p3
+
+anova(model2,model3, test='F')
+
+model4<-gam(CO2~s(Year,spar = 0.7),data=CE)
+model4_sum<-summary(model4)
+model4_sum
+
+r2_model4 <-(model4_sum$null.deviance-model4_sum$deviance)/model4_sum$null.deviance
+r2_model4
+
+CE$pred4 <- predict(model4) 
+mse4 <- mean((CE$pred4-CO2)^2)
+mse4
+p4 <-  ggplot(CE, aes(x=Year, y=CO2)) + geom_point()
+p4 <- p4 + theme_bw()
+p4 <- p4 + geom_line(aes(Year, pred4))
+p4
+anova(model3,model4,test='F')
+
